@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Geometry Dash - TypeScript Edition</title>
+  <link rel="stylesheet" href="./src/styles/main.css">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Головний HUD гри -->
+    <div id="game-hud" class="ui-layer" style="display: none;">
+      <div id="hud-container">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <button id="btn-pause" class="gd-btn gd-btn-blue clickable" style="padding: 6px 14px; font-size: 14px;">⏸ Пауза</button>
+          <span id="hud-attempts" style="font-weight: 700; font-size: 14px; color: #38bdf8;">Спроба 1</span>
+        </div>
+
+        <div class="progress-bar-wrapper">
+          <div id="hud-progress-fill" class="progress-bar-fill"></div>
+          <div id="hud-progress-text" class="progress-text">0%</div>
+        </div>
+
+        <div id="hud-mode-badge" style="font-weight: 900; font-size: 14px; color: #00ffcc; text-transform: uppercase;">CUBE</div>
+      </div>
+
+      <!-- Кнопки режиму практики -->
+      <div id="practice-hud" class="practice-hud" style="display: none;">
+        <button id="btn-add-checkpoint" class="gd-btn clickable" style="font-size: 14px; padding: 8px 16px;">+ Чекпоінт (Z)</button>
+        <button id="btn-remove-checkpoint" class="gd-btn gd-btn-pink clickable" style="font-size: 14px; padding: 8px 16px;">- Видалити (X)</button>
+      </div>
+    </div>
+
+    <!-- Головне меню та Вибір рівнів -->
+    <div id="menu-screen" class="menu-screen">
+      <h1 class="menu-title">GEOMETRY DASH</h1>
+
+      <!-- Карусель вибору рівнів -->
+      <div class="level-carousel-container" style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 24px;">
+        <button id="btn-prev-level" class="gd-btn gd-btn-blue clickable" style="font-size: 28px; width: 60px; height: 60px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;">◀</button>
+
+        <div id="level-card" class="modal-card clickable" style="width: 360px; padding: 24px; margin: 0; border-width: 3px; box-shadow: 0 0 25px rgba(0, 255, 204, 0.4);">
+          <div id="level-card-difficulty-badge" style="font-size: 38px; margin-bottom: 4px;">🔵</div>
+          <h2 id="level-card-title" style="font-size: 26px; font-weight: 900; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; margin-bottom: 4px;">Stereo Madness</h2>
+          <div id="level-card-info" style="font-size: 14px; font-weight: 700; color: #ffd700; margin-bottom: 12px;">Easy • ★ 1 • 130 BPM</div>
+          
+          <!-- Рекорд рівня -->
+          <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid #38bdf8; border-radius: 8px; padding: 6px 12px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
+              <span>Найкращий результат:</span>
+              <span id="level-card-best">0%</span>
+            </div>
+            <div style="background: #1e293b; height: 8px; border-radius: 4px; overflow: hidden;">
+              <div id="level-card-best-fill" style="width: 0%; height: 100%; background: #00ff88;"></div>
+            </div>
+          </div>
+
+          <!-- Кнопки гри для обраного рівня -->
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="btn-play-normal" class="gd-btn clickable" style="flex: 1; font-size: 16px; padding: 10px 14px;">▶ Грати</button>
+            <button id="btn-play-practice" class="gd-btn gd-btn-blue clickable" style="font-size: 14px; padding: 10px 14px;">◆ Практика</button>
+          </div>
+        </div>
+
+        <button id="btn-next-level" class="gd-btn gd-btn-blue clickable" style="font-size: 28px; width: 60px; height: 60px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;">▶</button>
+      </div>
+
+      <div class="menu-buttons" style="width: 500px; display: flex; flex-direction: row; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <button id="btn-open-community" class="gd-btn gd-btn-blue clickable" style="font-size: 14px; padding: 8px 16px;">🌐 Карти гравців</button>
+        <button id="btn-open-editor" class="gd-btn gd-btn-yellow clickable" style="font-size: 14px; padding: 8px 16px;">✏ Редактор</button>
+        <button id="btn-open-customizer" class="gd-btn gd-btn-pink clickable" style="font-size: 14px; padding: 8px 16px;">🎨 Кастомізація 3D</button>
+        <button id="btn-music-toggle" class="gd-btn gd-btn-blue clickable" style="font-size: 14px; padding: 8px 14px;">🔊 Музика: УВІМК</button>
+        <label class="gd-btn gd-btn-yellow clickable" style="font-size: 14px; padding: 8px 14px; cursor: pointer; display: flex; align-items: center;">
+          🎵 Свій MP3
+          <input type="file" id="custom-audio-input" accept="audio/*" style="display: none;">
+        </label>
+      </div>
+    </div>
+
+    <!-- Верхня панель регулювання висоти камери редактора -->
+    <div id="editor-camera-panel" class="editor-camera-panel clickable" style="display: none;">
+      <span style="font-size: 13px; font-weight: 900; color: #00ffcc;">📐 Камера Y:</span>
+      <span id="editor-camera-y-val" style="font-size: 14px; font-weight: 900; color: #ffd700; min-width: 65px; text-align: center;">-180 px</span>
+      <button id="btn-cam-up" class="gd-btn gd-btn-blue clickable" style="font-size: 12px; padding: 4px 10px;">▲ Вгору</button>
+      <button id="btn-cam-down" class="gd-btn gd-btn-blue clickable" style="font-size: 12px; padding: 4px 10px;">▼ Вниз</button>
+      <button id="btn-cam-ground" class="gd-btn gd-btn-yellow clickable" style="font-size: 12px; padding: 4px 10px;">⟲ До підлоги</button>
+      <input type="range" id="editor-cam-slider" min="-380" max="1500" step="15" value="-180" style="width: 130px; accent-color: #00ffcc; cursor: pointer;">
+      <span style="font-size: 11px; color: #94a3b8;">[W/S або Коліщатко]</span>
+    </div>
+
+    <!-- Панель інструментів редактора -->
+    <div id="editor-toolbar" class="editor-toolbar clickable" style="display: none;">
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button id="btn-editor-tool-place" class="gd-btn clickable" style="font-size: 12px; padding: 6px 12px;">Встановити</button>
+        <button id="btn-editor-tool-erase" class="gd-btn gd-btn-pink clickable" style="font-size: 12px; padding: 6px 12px;">Стерти</button>
+        <button id="btn-editor-rotate" class="gd-btn gd-btn-yellow clickable" style="font-size: 12px; padding: 6px 12px;">Повернути (R)</button>
+      </div>
+
+      <!-- Палітра типів об'єктів -->
+      <div id="editor-palette" class="editor-palette">
+        <!-- Створюється динамічно через TypeScript -->
+      </div>
+
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <input type="text" id="editor-level-name" placeholder="Назва карти" title="Назва карти" style="background: #0f172a; color: #00ffcc; font-weight: 700; border: 1px solid #38bdf8; border-radius: 6px; padding: 4px 8px; font-size: 12px; width: 110px;">
+        <input type="text" id="editor-level-creator" placeholder="Автор" title="Автор" style="background: #0f172a; color: #ffd700; font-weight: 700; border: 1px solid #38bdf8; border-radius: 6px; padding: 4px 8px; font-size: 12px; width: 75px;">
+        <button id="btn-editor-test" class="gd-btn clickable" style="font-size: 12px; padding: 6px 12px;">▶ Тест</button>
+        <button id="btn-editor-save" class="gd-btn gd-btn-blue clickable" style="font-size: 12px; padding: 6px 12px;">Зберегти</button>
+        <button id="btn-editor-export" class="gd-btn gd-btn-yellow clickable" style="font-size: 12px; padding: 6px 10px;">JSON</button>
+        <button id="btn-editor-exit" class="gd-btn gd-btn-pink clickable" style="font-size: 12px; padding: 6px 12px;">Вихід</button>
+      </div>
+    </div>
+
+    <!-- Модальне вікно: Розділ карт від гравців / спільноти -->
+    <div id="community-modal" class="modal-overlay" style="display: none;">
+      <div class="community-modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #38bdf8; padding-bottom: 12px;">
+          <div>
+            <h2 style="font-size: 26px; font-weight: 900; color: #00ffcc; text-shadow: 0 0 10px #00ffcc;">🌐 КАРТИ ГРАВЦІВ ТА СПІЛЬНОТИ</h2>
+            <p style="font-size: 13px; color: #94a3b8;">Грай у створені карти, ділися своїми та створюй нові!</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-community-create" class="gd-btn clickable" style="font-size: 13px; padding: 6px 14px;">+ Створити карту</button>
+            <button id="btn-community-import" class="gd-btn gd-btn-yellow clickable" style="font-size: 13px; padding: 6px 14px;">📥 Імпорт JSON</button>
+            <button id="btn-community-close" class="gd-btn gd-btn-pink clickable" style="font-size: 13px; padding: 6px 12px;">✖</button>
+          </div>
+        </div>
+
+        <!-- Сітка користувацьких карт -->
+        <div id="community-levels-list" class="community-grid">
+          <!-- Генерується динамічно через TypeScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальне вікно кастомізації -->
+    <div id="customizer-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card" style="max-width: 580px;">
+        <h2 class="modal-title">3D Скіни та Кастомізація</h2>
+        
+        <div style="display: flex; gap: 20px; align-items: center; justify-content: center; margin-bottom: 16px;">
+          <div style="text-align: center;">
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 6px;">3D Прев'ю (крутіть мишкою):</p>
+            <canvas id="preview-canvas" width="140" height="140" style="background: radial-gradient(circle, #102a45 0%, #050811 100%); border: 2px solid #00ffcc; border-radius: 16px; cursor: grab; box-shadow: 0 0 15px rgba(0,255,204,0.3);"></canvas>
+          </div>
+
+          <div style="text-align: left; flex: 1;">
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+              <input type="checkbox" id="check-3d-skin" checked style="width: 18px; height: 18px; accent-color: #00ffcc;">
+              <span style="font-weight: 700; color: #ffd700;">3D Об'ємний куб</span>
+            </label>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label class="gd-btn gd-btn-yellow clickable" style="font-size: 13px; padding: 8px 12px; text-align: center; cursor: pointer;">
+                📷 Завантажити своє фото
+                <input type="file" id="skin-image-upload" accept="image/*" style="display: none;">
+              </label>
+
+              <button id="btn-reset-skin-image" class="gd-btn gd-btn-pink clickable" style="font-size: 12px; padding: 6px 10px;">
+                ✖ Скинути до класичного
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Пресети 3D фото-скінів -->
+        <p style="font-size: 13px; font-weight: 700; color: #00ffcc; margin-bottom: 8px;">Швидкі фото-пресети:</p>
+        <div id="skin-presets" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 16px;">
+          <!-- Додаються через TS -->
+        </div>
+
+        <p style="margin-bottom: 6px; font-size: 13px; font-weight: 700; color: #00ffcc;">Основний колір підсвічування:</p>
+        <div id="primary-colors" class="color-picker-row"></div>
+
+        <p style="margin-bottom: 6px; font-size: 13px; font-weight: 700; color: #38bdf8;">Вторинний колір рамки:</p>
+        <div id="secondary-colors" class="color-picker-row"></div>
+
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button id="btn-customizer-close" class="gd-btn clickable">✓ Застосувати скін</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальне вікно паузи -->
+    <div id="pause-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card">
+        <h2 class="modal-title">Пауза</h2>
+        <div class="modal-actions" style="flex-direction: column;">
+          <button id="btn-pause-resume" class="gd-btn clickable">Продовжити</button>
+          <button id="btn-pause-restart" class="gd-btn gd-btn-yellow clickable">Почати спочатку</button>
+          <button id="btn-pause-menu" class="gd-btn gd-btn-pink clickable">Головне меню</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальне вікно перемоги -->
+    <div id="victory-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card">
+        <h2 class="modal-title">РІВЕНЬ ПРОЙДЕНО!</h2>
+        <p class="modal-text" id="victory-stats">100% за 1 спробу!</p>
+        <div class="modal-actions">
+          <button id="btn-victory-restart" class="gd-btn clickable">Грати знову</button>
+          <button id="btn-victory-menu" class="gd-btn gd-btn-pink clickable">В меню</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

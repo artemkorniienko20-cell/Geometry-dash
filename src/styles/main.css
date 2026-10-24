@@ -1,0 +1,398 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #050811;
+  font-family: 'Chakra Petch', sans-serif;
+  color: #ffffff;
+}
+
+#game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000000;
+}
+
+canvas#game-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Оверлей інтерфейсу */
+.ui-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.clickable {
+  pointer-events: auto;
+}
+
+/* Прогрес бар */
+#hud-container {
+  width: 100%;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-bar-wrapper {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid #00ffcc;
+  border-radius: 12px;
+  height: 22px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.4);
+}
+
+.progress-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88, #00ffff);
+  box-shadow: 0 0 12px #00ffff;
+  transition: width 0.05s linear;
+}
+
+.progress-text {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+/* Кнопки меню та HUD */
+.gd-btn {
+  background: linear-gradient(180deg, #00ff88, #00aa55);
+  border: 3px solid #ffffff;
+  border-radius: 12px;
+  color: #ffffff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  text-shadow: 2px 2px 0px #000000;
+  padding: 10px 24px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #005522, 0 8px 15px rgba(0, 255, 136, 0.4);
+  transition: all 0.1s ease;
+}
+
+.gd-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #005522, 0 12px 20px rgba(0, 255, 136, 0.6);
+}
+
+.gd-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #005522;
+}
+
+.gd-btn-blue {
+  background: linear-gradient(180deg, #00bfff, #0066cc);
+  box-shadow: 0 6px 0 #003366, 0 8px 15px rgba(0, 191, 255, 0.4);
+}
+.gd-btn-blue:hover {
+  box-shadow: 0 8px 0 #003366, 0 12px 20px rgba(0, 191, 255, 0.6);
+}
+.gd-btn-blue:active {
+  box-shadow: 0 2px 0 #003366;
+}
+
+.gd-btn-pink {
+  background: linear-gradient(180deg, #ff007f, #aa0055);
+  box-shadow: 0 6px 0 #550022, 0 8px 15px rgba(255, 0, 127, 0.4);
+}
+.gd-btn-pink:hover {
+  box-shadow: 0 8px 0 #550022, 0 12px 20px rgba(255, 0, 127, 0.6);
+}
+.gd-btn-pink:active {
+  box-shadow: 0 2px 0 #550022;
+}
+
+.gd-btn-yellow {
+  background: linear-gradient(180deg, #ffd700, #cc9900);
+  box-shadow: 0 6px 0 #664400, 0 8px 15px rgba(255, 215, 0, 0.4);
+}
+.gd-btn-yellow:hover {
+  box-shadow: 0 8px 0 #664400, 0 12px 20px rgba(255, 215, 0, 0.6);
+}
+.gd-btn-yellow:active {
+  box-shadow: 0 2px 0 #664400;
+}
+
+/* Практика кнопки */
+.practice-hud {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  gap: 12px;
+}
+
+/* Меню */
+.menu-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(10, 15, 30, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 50;
+}
+
+.menu-title {
+  font-size: 64px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #00ffcc;
+  text-shadow: 0 0 20px #00ffcc, 4px 4px 0 #000000;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 320px;
+}
+
+/* Редактор бар */
+.editor-camera-panel {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.92);
+  border: 2px solid #00ffcc;
+  border-radius: 14px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.35);
+  backdrop-filter: blur(8px);
+  z-index: 45;
+}
+
+.editor-toolbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.95);
+  border-top: 3px solid #38bdf8;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 40;
+}
+
+.editor-palette {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  max-width: 60%;
+  padding-bottom: 4px;
+}
+
+.palette-item {
+  min-width: 44px;
+  height: 44px;
+  background: #1e293b;
+  border: 2px solid #475569;
+  border-radius: 8px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.palette-item.active {
+  border-color: #00ffcc;
+  background: #0f766e;
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+.palette-item:hover {
+  transform: scale(1.05);
+}
+
+/* Модальні вікна (Пауза, Перемога, Смерть) */
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 60;
+}
+
+.modal-card {
+  background: #0f172a;
+  border: 4px solid #00ffcc;
+  border-radius: 20px;
+  padding: 36px 48px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 255, 204, 0.4);
+  max-width: 480px;
+  width: 90%;
+}
+
+.modal-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #00ffcc;
+  margin-bottom: 16px;
+  text-shadow: 0 0 10px #00ffcc;
+}
+
+.modal-text {
+  font-size: 18px;
+  margin-bottom: 24px;
+  color: #94a3b8;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* Кастомізація персонажа */
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+
+.color-option {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 3px solid #ffffff;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.color-option.selected {
+  border-color: #ffd700;
+  transform: scale(1.2);
+  box-shadow: 0 0 10px #ffd700;
+}
+
+/* Модальне вікно рівнів гравців */
+.community-modal-card {
+  background: #0f172a;
+  border: 4px solid #00ffcc;
+  border-radius: 20px;
+  padding: 24px 32px;
+  box-shadow: 0 0 35px rgba(0, 255, 204, 0.4);
+  max-width: 860px;
+  width: 95%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.community-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+  overflow-y: auto;
+  max-height: 55vh;
+  padding: 8px 6px;
+  margin: 16px 0;
+}
+
+.community-card {
+  background: #1e293b;
+  border: 2px solid #38bdf8;
+  border-radius: 12px;
+  padding: 14px 18px;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.community-card:hover {
+  border-color: #00ffcc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 255, 204, 0.25);
+}
+
+.community-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.community-card-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #00ffcc;
+}
+
+.community-card-author {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.community-card-meta {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+
+.community-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
