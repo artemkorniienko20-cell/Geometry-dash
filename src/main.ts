@@ -73,6 +73,8 @@ class GeometryDashApp {
   private levelCardBest!: HTMLElement;
   private levelCardBestFill!: HTMLElement;
   private levelCardElement!: HTMLElement;
+  private levelCardCounter!: HTMLElement;
+  private levelSelectDropdown!: HTMLSelectElement;
 
   constructor() {
     this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
@@ -128,6 +130,20 @@ class GeometryDashApp {
     this.levelCardBest = document.getElementById('level-card-best')!;
     this.levelCardBestFill = document.getElementById('level-card-best-fill')!;
     this.levelCardElement = document.getElementById('level-card')!;
+    this.levelCardCounter = document.getElementById('level-card-counter')!;
+    this.levelSelectDropdown = document.getElementById('level-select-dropdown') as HTMLSelectElement;
+
+    // Заповнення випадаючого списку 20 рівнів
+    this.levels.forEach((lvl, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx.toString();
+      opt.textContent = `${idx + 1}. ${lvl.name} (${lvl.difficulty} ★${lvl.stars})`;
+      this.levelSelectDropdown.appendChild(opt);
+    });
+
+    this.levelSelectDropdown.addEventListener('change', () => {
+      this.selectLevel(parseInt(this.levelSelectDropdown.value, 10));
+    });
 
     document.getElementById('btn-prev-level')?.addEventListener('click', () => {
       this.currentLevelIndex = (this.currentLevelIndex - 1 + this.levels.length) % this.levels.length;
@@ -271,6 +287,12 @@ class GeometryDashApp {
     this.levelCardElement.style.boxShadow = `0 0 25px ${b.color}55`;
 
     this.levelCardInfo.textContent = `${lvl.difficulty} • ★ ${lvl.stars} • ${lvl.bpm} BPM`;
+    if (this.levelCardCounter) {
+      this.levelCardCounter.textContent = `Рівень ${this.currentLevelIndex + 1} з ${this.levels.length}`;
+    }
+    if (this.levelSelectDropdown) {
+      this.levelSelectDropdown.value = this.currentLevelIndex.toString();
+    }
 
     // Найкращий результат рівня
     const bestKey = 'gd_best_' + lvl.id;
